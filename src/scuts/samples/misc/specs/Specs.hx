@@ -110,7 +110,7 @@ class ComponentTup3<A,B, C, A1, B1, C1> implements Component<Tup3<A,B,C>, Tup3<A
 typedef IJoin<A,B> = Implicit<Join<A,B>>;
 
 class JoinApi implements ApiOf<Join<_,_>> {
-	public inline static function getFor <Value, Storage>(_:scuts.data.TypeArg<Value>, ?J:IJoin<Storage, Value>) {
+	public inline static function getFor <Value, Storage>(_:scuts.data.Proxy<Value>, ?J:IJoin<Storage, Value>) {
 		return J;
 	}
 }
@@ -372,15 +372,15 @@ class ShowHero<K, V> implements Show<Hero> implements ImplicitInstance {
 }
 
 class WorldApi {
-	public static function join <C, S>(w:World, t:scuts.data.TypeArg<C>, ?GS:IGetStorage<World, C, S>, ?J:IJoin<S, C>) {
+	public static function join <C, S>(w:World, t:scuts.data.Proxy<C>, ?GS:IGetStorage<World, C, S>, ?J:IJoin<S, C>) {
 		return J.join(getStore(w, t));
 	}
 
-	public static function joinStore <C, S>(s:S, t:scuts.data.TypeArg<C>, ?J:IJoin<S, C>) {
+	public static function joinStore <C, S>(s:S, t:scuts.data.Proxy<C>, ?J:IJoin<S, C>) {
 		return J.join(s);
 	}
 
-	public static function getStore <C, S>(w:World, t:scuts.data.TypeArg<C>, ?GS:IGetStorage<World, C, S>) {
+	public static function getStore <C, S>(w:World, t:scuts.data.Proxy<C>, ?GS:IGetStorage<World, C, S>) {
 		return GS.getStore(w);
 	}
 	public static function createEntity<C, S>(w:World):Index {

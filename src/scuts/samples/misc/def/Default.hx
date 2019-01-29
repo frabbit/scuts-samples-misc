@@ -13,7 +13,7 @@ class DefaultString implements Default<String> implements ImplicitInstance {
 typedef IDefault<T> = Implicit<Default<T>>;
 
 class DefaultApi {
-	public function get <T>(_:TypeArg<T>, ?D:IDefault<T>):T return D.get();
+	public function get <T>(_:Proxy<T>, ?D:IDefault<T>):T return D.get();
 }
 
 

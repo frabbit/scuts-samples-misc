@@ -9,7 +9,7 @@ interface Plus<T> {
 }
 
 interface Arithmetic<T> {
-	var Plus(default,null):Plus<T>;
+	var Plus(default,never):Plus<T>;
 	function Plus1 (a:T, b:T):T;
 }
 
@@ -21,8 +21,10 @@ class Arithmetic2Float implements Arithmetic2<Float, PlusFloat>  implements Impl
 	public final Plus:PlusFloat = PlusFloat.instance;
 }
 
-@:generic class PlusFloat implements Plus<Float> implements ImplicitInstance {
-	public function plus (t1:Float, t2:Float):Float return t1 + t2;
+class PlusFloat implements Plus<Float>  {
+	function new () {}
+	public static final instance = new PlusFloat();
+	public inline function plus (t1:Float, t2:Float):Float return t1 + t2;
 }
 
 @:generic @:final class ArithmeticFloat implements Arithmetic<Float> implements ImplicitInstance {
@@ -32,7 +34,7 @@ class Arithmetic2Float implements Arithmetic2<Float, PlusFloat>  implements Impl
 
 class FastFloat {
 	public function new () {}
-	public function plus (t1:Float, t2:Float):Float return t1 + t2;
+	public inline function plus (t1:Float, t2:Float):Float return t1 + t2;
 }
 
 class App {
@@ -49,11 +51,9 @@ class App {
 
 		// warmup
 		for (i in 0...100000) {
-			plusStatic(2.2, 2.7);
+			//plusStatic(2.2, 2.7);
 		}
-		for (i in 0...100000) {
-			plusInstance(2.2, 2.7);
-		}
+
 
 		var loops = 10000000;
 		var runs = 2;
@@ -62,7 +62,7 @@ class App {
 		var ff = new FastFloat();
 
 		for (i in 0...runs) {
-
+			/*
 			test(() -> {
 				var acc = 0.0;
 				for (i in 0...loops) {
@@ -70,13 +70,7 @@ class App {
 				}
 				q = acc;
 			}, "plusStatic");
-			test(() -> {
-				var acc = 0.0;
-				for (i in 0...loops) {
-					acc += plusInstance(2.2, 2.7);
-				}
-				q = acc;
-			}, "plusInstance");
+
 			test(() -> {
 				var acc = 0.0;
 				var P = PlusFloat.instance;
@@ -85,25 +79,20 @@ class App {
 				}
 				q = acc;
 			}, "plusInstanceArg");
+			*/
 			test(() -> {
 				var acc = 0.0;
-				var P = PlusFloat.instance;
+				acc += PlusFloat.instance.plus(1,2);
 				for (i in 0...loops) {
-					acc += plusConstraint(2.2, 2.7, P);
+					acc = acc + plusConstraint(2.2, 2.7, PlusFloat.instance);
 				}
 				q = acc;
 			}, "plus2 ");
+			/*
 			test(() -> {
 				var acc = 0.0;
 				var P = PlusFloat.instance;
-				for (i in 0...loops) {
-					acc += plusConstraintNotOptional(2.2, 2.7, P);
-				}
-				q = acc;
-			}, "plusNotOptional ");
-			test(() -> {
-				var acc = 0.0;
-				var P = PlusFloat.instance;
+				$type(P);
 				for (i in 0...loops) {
 					acc += plus3(2.2, 2.7, P);
 				}
@@ -137,68 +126,66 @@ class App {
 				}
 				q = acc;
 			}, "plus11 ");
-
+			*/
 
 		}
 		trace("########## Benchmark End ############");
 
 	}
-	static function doPlus (a:Float, b:Float) {
+	/*
+	static inline function doPlus (a:Float, b:Float) {
 		return a + b;
 	}
 
-	@:generic static function plusX <T,S:Plus<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Plus<T>>) {
+	@:generic inline static function plusX <T,S:Plus<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Plus<T>>) {
 		return A.plus(a,b);
 	}
 
-	static function plusStatic (a:Float, b:Float) {
+	static inline function plusStatic (a:Float, b:Float) {
 		return doPlus(a, b); // don't take inlining into account
 	}
 
-	static var instance = PlusFloat.instance;
 
-	static function plusInstance (a:Float, b:Float) {
-		return instance.plus(a, b); // don't take inlining into account
-	}
 
-	static function plusInstanceArg (a:Float, b:Float, A:PlusFloat) {
+	static inline function plusInstanceArg (a:Float, b:Float, A:PlusFloat) {
 		return A.plus(a, b); // don't take inlining into account
 	}
 
 
 
-	@:generic static function plus1 <T>(a:T, b:T, ?A:Implicit<Arithmetic<T>>) {
+	@:generic inline static function plus1 <T>(a:T, b:T, ?A:Implicit<Arithmetic<T>>) {
+		return A.Plus.plus(a, b);
+	}
+	*/
+	/*@:generic inline static function plusConstraint <T,S:Plus<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Plus<T>>) {
+		return A.plus(a, b);
+	}*/
+
+	inline static function plusConstraint <T,S:Plus<T>>(a:T, b:T, A:S) {
+		return A.plus(a, b);
+	}
+
+	/*
+	@:generic inline static function plus3 <T>(a:T, b:T, A:Plus<T>) {
+		return A.plus(a, b);
+	}
+
+	@:generic inline static function plus7 <T,S:Arithmetic<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Arithmetic<T>>) {
 		return A.Plus.plus(a, b);
 	}
 
-	@:generic static function plusConstraint <T,S:Plus<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Plus<T>>) {
-		return A.plus(a, b);
-	}
-
-	@:generic static function plusConstraintNotOptional <T,S:Plus<T>>(a:T, b:T, A:S) {
-		return A.plus(a, b);
-	}
-
-	@:generic static function plus3 <T>(a:T, b:T, A:Plus<T>) {
-		return A.plus(a, b);
-	}
-
-	@:generic static function plus7 <T,S:Arithmetic<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Arithmetic<T>>) {
-		return A.Plus.plus(a, b);
-	}
-
-	@:generic static function plus8 <T,S:Arithmetic<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Arithmetic<T>>) {
+	@:generic inline static function plus8 <T,S:Arithmetic<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Arithmetic<T>>) {
 		return A.Plus1(a,b);
 	}
 
-	@:generic static function plus9 <T,S:Arithmetic<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Arithmetic<T>>) {
+	@:generic inline static function plus9 <T,S:Arithmetic<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Arithmetic<T>>) {
 		return plusX(a,b);
 	}
 
-	@:generic static function plus11 <T,S:Arithmetic2<T,X>, X:Plus<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Arithmetic2<T, X>>) {
+	@:generic inline static function plus11 <T,S:Arithmetic2<T,X>, X:Plus<T>>(a:T, b:T, ?A:ImplicitGeneric<S, Arithmetic2<T, X>>) {
 		return A.Plus.plus(a,b);
 	}
-
+	*/
 
 
 }

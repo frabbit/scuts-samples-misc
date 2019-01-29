@@ -14,7 +14,7 @@ class CanFailOption implements CanFail<Option<_>> implements ImplicitInstance {
 }
 
 class Api {
-	public static function safeDivision <Failable>(a:Float, b:Float, _:TypeArg<Failable>, ?CF:Implicit<CanFail<Failable>>):Failable<Float> {
+	public static function safeDivision <Failable>(a:Float, b:Float, _:Proxy<Failable>, ?CF:Implicit<CanFail<Failable>>):Failable<Float> {
 		return if (b == 0.0) CF.or() else CF.win(a / b);
 	}
 }
